@@ -2,3 +2,4 @@ agno
 yfinance
 python-dotenv
 boto3
+duckdb
