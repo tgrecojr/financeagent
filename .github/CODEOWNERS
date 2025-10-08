@@ -1,0 +1,5 @@
+# CODEOWNERS file
+# This ensures that @tgrecojr must approve all pull requests
+
+# All files require approval from tgrecojr
+* @tgrecojr
