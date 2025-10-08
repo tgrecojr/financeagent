@@ -1,6 +1,6 @@
 # Portfolio Analysis
 
-A financial portfolio analysis tool that uses AI agents to analyze stock portfolios and provide optimization strategies for selling off holdings to avoid over-leverage.
+A financial portfolio analysis tool that uses AI agents to analyze stock portfolios and provide optimization strategies for selling off holdings to avoid over-leverage, plus daily technical analysis for individual stocks.
 
 ## Overview
 
@@ -9,14 +9,22 @@ This tool uses AWS Bedrock-powered AI agents to:
 - Gather real-time financial data and market analysis for specific stocks
 - Generate comprehensive position analysis and detailed optimization strategies
 - Provide actionable sell-off plans over time
+- Perform daily technical analysis with RSI, MACD, and plain-language insights
 
 **Why AWS Bedrock?** This implementation uses AWS Bedrock to allow you to configure and switch between different AI models without changing code. Simply update the model IDs in your `.env` file to experiment with different models and find the best performance for your analysis needs.
 
 ## Features
 
+### Portfolio Analysis (portfolio_analysis.py)
 - **Portfolio Agent**: Reads and analyzes CSV files containing your stock holdings
 - **Finance Agent**: Retrieves current stock prices, company info, historical data, analyst recommendations, and company news using YFinance
 - **Team Collaboration**: Combines both agents to provide comprehensive analysis and optimization strategies
+
+### Daily Technical Analysis (daily_analysis.py)
+- **Daily Analysis Agent**: Performs technical analysis on individual stocks
+- **RSI & MACD Calculations**: Analyzes 100 days of historical data to calculate RSI(14) and MACD(12,26,9)
+- **Buy/Hold/Sell Signals**: Generates actionable recommendations based on technical indicators
+- **Plain-Language Insights**: Provides easy-to-understand market commentary without jargon
 
 ## Requirements
 
@@ -32,11 +40,19 @@ pip install -r requirements.txt
 ```
 
 2. Create a `.env` file with the following required variables:
+
+**For Portfolio Analysis:**
 ```
 PORTFOLIO_CSVS_LOCATION=/path/to/your/csv/files
 FINANCE_AGENT_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
 PORTFOLIO_AGENT_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
 PORTFOLIO_ANALYSIS_TEAM_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
+STOCK_TICKER=COF
+```
+
+**For Daily Analysis:**
+```
+DAILY_ANALYSIS_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
 STOCK_TICKER=COF
 ```
 
@@ -57,6 +73,8 @@ You can mix and match different models for each agent based on your performance 
 
 ## Usage
 
+### Portfolio Analysis
+
 Run the portfolio analysis:
 
 ```bash
@@ -70,14 +88,37 @@ The tool will:
 4. Generate a comprehensive position analysis
 5. Provide a detailed optimization strategy with specific sell-off recommendations
 
+### Daily Technical Analysis
+
+Run the daily analysis:
+
+```bash
+python daily_analysis.py
+```
+
+The tool will:
+1. Validate required environment variables
+2. Fetch 100 days of historical price data for the specified stock ticker
+3. Calculate RSI(14) and MACD(12,26,9) technical indicators
+4. Generate a Buy/Hold/Sell recommendation based on:
+   - **Buy Signal**: RSI < 30 (oversold) AND MACD > Signal (bullish crossover)
+   - **Sell Signal**: RSI > 70 (overbought) AND MACD < Signal (bearish crossover)
+   - **Hold Signal**: All other conditions
+5. Provide plain-language insights and helpful tips
+
 ## Configuration
 
 All configuration is managed through environment variables:
 
+### Portfolio Analysis Variables
 - `PORTFOLIO_CSVS_LOCATION`: Path to folder containing portfolio CSV files
 - `FINANCE_AGENT_MODEL`: AWS Bedrock model ID for the finance agent
 - `PORTFOLIO_AGENT_MODEL`: AWS Bedrock model ID for the portfolio agent
 - `PORTFOLIO_ANALYSIS_TEAM_MODEL`: AWS Bedrock model ID for the team coordinator
+- `STOCK_TICKER`: Stock ticker symbol to analyze (e.g., COF for Capital One)
+
+### Daily Analysis Variables
+- `DAILY_ANALYSIS_MODEL`: AWS Bedrock model ID for the daily analysis agent
 - `STOCK_TICKER`: Stock ticker symbol to analyze (e.g., COF for Capital One)
 
 ## Dependencies
