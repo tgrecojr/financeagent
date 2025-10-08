@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is an AI-powered portfolio analysis tool that helps investors analyze their stock holdings and develop optimization strategies for reducing over-leveraged positions. The tool uses a multi-agent architecture built on the Agno framework with AWS Bedrock models.
+This is an AI-powered portfolio analysis tool that helps investors analyze their stock holdings and develop optimization strategies for reducing over-leveraged positions. It also includes a daily technical analysis tool for individual stocks. The tools use a multi-agent architecture built on the Agno framework with AWS Bedrock models.
 
 ## Architecture
 
@@ -36,39 +36,75 @@ This is an AI-powered portfolio analysis tool that helps investors analyze their
    - **Model**: Configurable AWS Bedrock model (team coordinator)
    - **Output**: Comprehensive position analysis with detailed optimization strategy
 
+5. **Daily Analysis Agent** (separate script: daily_analysis.py)
+   - **Purpose**: Performs daily technical analysis on individual stocks
+   - **Tools**: YFinanceTools (current price and historical price data)
+   - **Model**: Configurable AWS Bedrock model
+   - **Instructions**: Analyzes 100 days of historical data to calculate RSI(14) and MACD(12,26,9)
+   - **Output**: Buy/Hold/Sell recommendation with plain-language insights
+
 ### Design Decisions
 
 - **AWS Bedrock**: Chosen to allow model configuration without code changes
 - **Multi-agent approach**: Separates portfolio data analysis from market data retrieval for better modularity
 - **Team coordination**: Combines insights from both agents for holistic analysis
+- **Single-agent daily analysis**: Lightweight tool focused solely on technical indicators
 - **Environment-based config**: All settings externalized for easy deployment and testing
 
 ## Current Functionality
 
-### What It Does
+### Portfolio Analysis (portfolio_analysis.py)
 1. Loads portfolio data from multiple CSV files (supports multiple brokerage accounts)
 2. Fetches current market data for specified stock ticker
 3. Analyzes holdings against current market conditions
 4. Generates a detailed sell-off strategy to avoid over-leverage
 5. Provides specific recommendations with timing for selling positions
 
+### Daily Technical Analysis (daily_analysis.py)
+1. Fetches 100 days of historical price data for specified stock ticker
+2. Calculates RSI(14) technical indicator (14-day Relative Strength Index)
+3. Calculates MACD(12,26,9) technical indicator (Moving Average Convergence Divergence)
+4. Generates Buy/Hold/Sell recommendation based on:
+   - Buy Signal: RSI < 30 (oversold) AND MACD > Signal (bullish crossover)
+   - Sell Signal: RSI > 70 (overbought) AND MACD < Signal (bearish crossover)
+   - Hold Signal: All other conditions
+5. Provides plain-language insights without technical jargon
+6. Includes helpful tips and commentary for each stock
+
 ### Input Requirements
+
+**Portfolio Analysis:**
 - CSV files with portfolio holdings (from brokerage accounts)
 - Stock ticker symbol to analyze
-- AWS Bedrock model IDs for each agent
+- AWS Bedrock model IDs for each agent (3 models)
+- AWS credentials configured for Bedrock access
+
+**Daily Analysis:**
+- Stock ticker symbol to analyze
+- AWS Bedrock model ID for daily analysis agent
 - AWS credentials configured for Bedrock access
 
 ### Output
+
+**Portfolio Analysis:**
 - Comprehensive position analysis
 - Detailed optimization strategy
 - Specific action plan with timing for selling positions
 - Uses all individual stock details (not just summaries)
 
+**Daily Analysis:**
+- RSI(14) and MACD(12,26,9) technical indicator values
+- Buy/Hold/Sell recommendation with reasoning
+- Plain-language market insights
+- Helpful tips and commentary
+- Timestamped summary
+
 ## File Structure
 
 ```
 financeagent/
-├── portfolio_analysis.py    # Main application file
+├── portfolio_analysis.py    # Portfolio analysis with multi-agent team
+├── daily_analysis.py         # Daily technical analysis tool
 ├── requirements.txt          # Python dependencies
 ├── .env                      # Environment variables (not in repo)
 ├── .gitignore               # Git ignore rules
@@ -78,21 +114,36 @@ financeagent/
 
 ## Key Functions
 
-### `validate_environment_variables()`
+### Portfolio Analysis (portfolio_analysis.py)
+
+#### `validate_environment_variables()`
 - **Location**: portfolio_analysis.py:23
 - Validates presence of all required environment variables
 - Exits with error message if any are missing
 
-### `get_csv_files_os(folder_path)`
+#### `get_csv_files_os(folder_path)`
 - **Location**: portfolio_analysis.py:43
 - Scans folder for CSV files
 - Returns list of absolute paths to all CSV files
 
-### `create_agents(config)`
+#### `create_agents(config)`
 - **Location**: portfolio_analysis.py:50
 - Instantiates portfolio agent, finance agent, and team
 - Executes the analysis query
 - Streams results to console
+
+### Daily Analysis (daily_analysis.py)
+
+#### `validate_environment_variables()`
+- **Location**: daily_analysis.py:20
+- Validates presence of DAILY_ANALYSIS_MODEL and STOCK_TICKER
+- Exits with error message if any are missing
+
+#### `create_agents(config)`
+- **Location**: daily_analysis.py:45
+- Instantiates daily analysis agent with YFinanceTools
+- Executes technical analysis query with RSI and MACD calculations
+- Streams results to console with plain-language insights
 
 ## Suggested Improvement Phases
 
@@ -192,11 +243,15 @@ financeagent/
 ## Environment Variables Reference
 
 ```bash
-# Required
+# Portfolio Analysis - Required
 PORTFOLIO_CSVS_LOCATION=/path/to/csv/files
 FINANCE_AGENT_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
 PORTFOLIO_AGENT_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
 PORTFOLIO_ANALYSIS_TEAM_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
+STOCK_TICKER=COF
+
+# Daily Analysis - Required
+DAILY_ANALYSIS_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
 STOCK_TICKER=COF
 
 # AWS Credentials (set via AWS CLI or environment)
@@ -252,8 +307,11 @@ When making changes, verify:
 pip install -r requirements.txt
 cp .env.example .env  # Edit with your values
 
-# Run
+# Run portfolio analysis
 python portfolio_analysis.py
+
+# Run daily technical analysis
+python daily_analysis.py
 
 # Test with different models
 # Edit .env and change model IDs, then re-run
