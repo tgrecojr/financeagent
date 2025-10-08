@@ -1,4 +1,3 @@
-from ast import Load
 from agno.agent import Agent
 from agno.models.aws import AwsBedrock
 from agno.tools.yfinance import YFinanceTools
