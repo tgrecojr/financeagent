@@ -47,13 +47,13 @@ PORTFOLIO_CSVS_LOCATION=/path/to/your/csv/files
 FINANCE_AGENT_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
 PORTFOLIO_AGENT_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
 PORTFOLIO_ANALYSIS_TEAM_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
-STOCK_TICKER=COF
+STOCK_TICKER=NFLX
 ```
 
 **For Daily Analysis:**
 ```
 DAILY_ANALYSIS_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
-STOCK_TICKER=COF
+STOCK_TICKER=NFLX
 ```
 
 **AWS Bedrock Model ID Examples:**
@@ -115,11 +115,11 @@ All configuration is managed through environment variables:
 - `FINANCE_AGENT_MODEL`: AWS Bedrock model ID for the finance agent
 - `PORTFOLIO_AGENT_MODEL`: AWS Bedrock model ID for the portfolio agent
 - `PORTFOLIO_ANALYSIS_TEAM_MODEL`: AWS Bedrock model ID for the team coordinator
-- `STOCK_TICKER`: Stock ticker symbol to analyze (e.g., COF for Capital One)
+- `STOCK_TICKER`: Stock ticker symbol to analyze (e.g., NFLX for Netflix)
 
 ### Daily Analysis Variables
 - `DAILY_ANALYSIS_MODEL`: AWS Bedrock model ID for the daily analysis agent
-- `STOCK_TICKER`: Stock ticker symbol to analyze (e.g., COF for Capital One)
+- `STOCK_TICKER`: Stock ticker symbol to analyze (e.g., NFLX for Netflix)
 
 ## Dependencies
 
