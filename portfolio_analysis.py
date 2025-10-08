@@ -9,7 +9,7 @@ import os
 import sys
 
 
-os.environ['setAGNO_TELEMETRY'] = 'False'
+os.environ['AGNO_TELEMETRY'] = 'False'
 
 class Config:
     """Configuration object for portfolio analysis."""
