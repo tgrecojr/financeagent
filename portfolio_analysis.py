@@ -1,5 +1,5 @@
 from agno.agent import Agent
-from agno.models.aws import AwsBedrock
+from agno.models.openai import OpenAIChat
 from agno.tools.yfinance import YFinanceTools
 from agno.tools.csv_toolkit import CsvTools
 from agno.team import Team
@@ -18,6 +18,7 @@ class Config:
         self.portfolio_agent_model = os.getenv("PORTFOLIO_AGENT_MODEL")
         self.portfolio_analysis_team_model = os.getenv("PORTFOLIO_ANALYSIS_TEAM_MODEL")
         self.stock_ticker = os.getenv("STOCK_TICKER")
+        self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
 
 
 def validate_environment_variables():
@@ -27,7 +28,8 @@ def validate_environment_variables():
         "FINANCE_AGENT_MODEL",
         "PORTFOLIO_AGENT_MODEL",
         "PORTFOLIO_ANALYSIS_TEAM_MODEL",
-        "STOCK_TICKER"
+        "STOCK_TICKER",
+        "OPENROUTER_API_KEY"
     ]
 
     missing_vars = []
@@ -51,7 +53,11 @@ def get_csv_files_os(folder_path):
 def create_agents(config):
 
     portfolio_agent = Agent(
-        model=AwsBedrock(id=config.portfolio_agent_model),
+        model=OpenAIChat(
+            id=config.portfolio_agent_model,
+            api_key=config.openrouter_api_key,
+            base_url="https://openrouter.ai/api/v1"
+        ),
         tools=[CsvTools(csvs=get_csv_files_os(config.portfolio_csv_location))],
         markdown=True,
         instructions=[
@@ -62,7 +68,11 @@ def create_agents(config):
     # Initialize the agent
     finance_agent = Agent(
         name="Finance AI Agent",
-        model=AwsBedrock(id=config.finance_agent_model),
+        model=OpenAIChat(
+            id=config.finance_agent_model,
+            api_key=config.openrouter_api_key,
+            base_url="https://openrouter.ai/api/v1"
+        ),
         tools=[
             YFinanceTools(
                 include_tools=[
@@ -81,7 +91,11 @@ def create_agents(config):
 
     portfolio_analysis_team = Team(
         name="Capital One Selloff Team",
-        model=AwsBedrock(id=config.portfolio_analysis_team_model),
+        model=OpenAIChat(
+            id=config.portfolio_analysis_team_model,
+            api_key=config.openrouter_api_key,
+            base_url="https://openrouter.ai/api/v1"
+        ),
         members=[portfolio_agent, finance_agent],
         markdown=True,
         #instructions=["please give me a COMPREHENSIVE COF POSITION ANALYSIS & detailed OPTIMIZATION STRATEGY using all of my stock details (not summary) for selling off my COF portfolio to avoid being overleveraged.  I am looking for a specific plan of action over a course of time specifying which stocks to sell off at what times."],

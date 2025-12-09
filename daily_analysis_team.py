@@ -46,8 +46,8 @@ def get_csv_files_os(folder_path):
 
 def create_agents(config):
 
-    daily_agent = Agent(
-        name="Daily Stock Analysis Agent",
+    history_agent = Agent(
+        name="Historical Stock Retreival AI Agent",
         model=OpenAIChat(
             id=config.daily_analysis_model,
             api_key=config.openrouter_api_key,
@@ -57,19 +57,42 @@ def create_agents(config):
             YFinanceTools(
                 include_tools=[
                     "get_current_stock_price",
-                    "get_historical_stock_prices",                ]
+                    "get_historical_stock_prices",
+                ]
             )
         ],
+        instructions=[f"Use the tool provided to return the last 100 days of market open,close, high, low, and volume data for {config.stock_ticker} stock"],
         markdown=True,
-
     )
 
-    daily_agent.print_response(
-        f"""For the stock ticker {config.stock_ticker}, perform a fundamental analysis (e.g., momentum data) by looking back at the last 100 days 
-        to calculate the RSI(14), and MACD(12,26,9) values to determine a Decision status: "Buy", "Hold", or "Sell" based on:
+    tech_analysis_agent = Agent(
+        name="Technical Analysis AI Agent",
+        model=OpenAIChat(
+            id=config.daily_analysis_model,
+            api_key=config.openrouter_api_key,
+            base_url="https://openrouter.ai/api/v1"
+        ),
+        instructions=[f"""Looking back at the last 100 days to calculate the RSI(14), and MACD(12,26,9) values to determine a Decision status: "Buy", "Hold", or "Sell" based on:
         - Buy Signal: RSI < 30 (oversold) AND MACD > Signal (bullish crossover)
         - Sell Signal: RSI > 70 (overbought) AND MACD < Signal (bearish crossover)
-        - Hold Signal: All other conditions (default recommendation)
+        - Hold Signal: All other conditions (default recommendation)"""],
+        markdown=True,
+    )
+
+    summary_analysis_team = Team(
+        name="Daily Stock Analysis Team",
+        model=OpenAIChat(
+            id=config.daily_analysis_model,
+            api_key=config.openrouter_api_key,
+            base_url="https://openrouter.ai/api/v1"
+        ),
+        members=[history_agent, tech_analysis_agent],
+        markdown=True,
+    )
+
+
+    summary_analysis_team.print_response(
+        f"""For the stock ticker {config.stock_ticker}:
         - Write a short, plain-language insight about what's happening
         - Use familiar terms like "gaining steam," "cooling off," or "showing hesitation"
         - Avoid technical jargon like RSI or MACD unless context makes it helpful
@@ -78,6 +101,17 @@ def create_agents(config):
         Finish with a summary line using the timestamp like this:
         Summary as of October 8, 2025 – Most stocks were stable with one or two worth watching.""",
         stream=True
+    )
+
+    summary_agent = Agent(
+        name="Summary Stock Analysis Analysis Agent",
+        model=OpenAIChat(
+            id=config.daily_analysis_model,
+            api_key=config.openrouter_api_key,
+            base_url="https://openrouter.ai/api/v1"
+        ),
+        markdown=True,
+
     )
 
 
