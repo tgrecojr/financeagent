@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is an AI-powered portfolio analysis tool that helps investors analyze their stock holdings and develop optimization strategies for reducing over-leveraged positions. It also includes a daily technical analysis tool for individual stocks. The tools use a multi-agent architecture built on the Agno framework with AWS Bedrock models.
+This is an AI-powered portfolio analysis tool that helps investors analyze their stock holdings and develop optimization strategies for reducing over-leveraged positions. It also includes a daily technical analysis tool for individual stocks. The tools use a multi-agent architecture built on the Agno framework with OpenRouter API through the OpenAI SDK.
 
 ## Architecture
 
@@ -11,12 +11,12 @@ This is an AI-powered portfolio analysis tool that helps investors analyze their
 1. **Configuration System** (`Config` class)
    - Environment-based configuration management
    - Validates all required environment variables on startup
-   - Supports flexible model selection via AWS Bedrock model IDs
+   - Supports flexible model selection via OpenRouter model IDs
 
 2. **Portfolio Agent**
    - **Purpose**: Analyzes CSV files containing portfolio holdings
    - **Tools**: CsvTools for reading and analyzing CSV data
-   - **Model**: Configurable AWS Bedrock model
+   - **Model**: Configurable OpenRouter model via OpenAI SDK
    - **Instructions**: Reads all CSV files to gather complete holding details
 
 3. **Finance Agent**
@@ -27,25 +27,25 @@ This is an AI-powered portfolio analysis tool that helps investors analyze their
      - Historical price data
      - Analyst recommendations
      - Company news
-   - **Model**: Configurable AWS Bedrock model
+   - **Model**: Configurable OpenRouter model via OpenAI SDK
    - **Instructions**: Provides accurate financial information for the specified stock ticker
 
 4. **Portfolio Analysis Team**
    - **Purpose**: Coordinates both agents to generate comprehensive analysis
    - **Members**: Portfolio Agent + Finance Agent
-   - **Model**: Configurable AWS Bedrock model (team coordinator)
+   - **Model**: Configurable OpenRouter model via OpenAI SDK (team coordinator)
    - **Output**: Comprehensive position analysis with detailed optimization strategy
 
 5. **Daily Analysis Agent** (separate script: daily_analysis.py)
    - **Purpose**: Performs daily technical analysis on individual stocks
    - **Tools**: YFinanceTools (current price and historical price data)
-   - **Model**: Configurable AWS Bedrock model
+   - **Model**: Configurable OpenRouter model via OpenAI SDK
    - **Instructions**: Analyzes 100 days of historical data to calculate RSI(14) and MACD(12,26,9)
    - **Output**: Buy/Hold/Sell recommendation with plain-language insights
 
 ### Design Decisions
 
-- **AWS Bedrock**: Chosen to allow model configuration without code changes
+- **OpenRouter via OpenAI SDK**: Chosen to allow model configuration without code changes and access to multiple AI providers through a single API
 - **Multi-agent approach**: Separates portfolio data analysis from market data retrieval for better modularity
 - **Team coordination**: Combines insights from both agents for holistic analysis
 - **Single-agent daily analysis**: Lightweight tool focused solely on technical indicators
@@ -76,13 +76,13 @@ This is an AI-powered portfolio analysis tool that helps investors analyze their
 **Portfolio Analysis:**
 - CSV files with portfolio holdings (from brokerage accounts)
 - Stock ticker symbol to analyze
-- AWS Bedrock model IDs for each agent (3 models)
-- AWS credentials configured for Bedrock access
+- OpenRouter model IDs for each agent (3 models)
+- OpenRouter API key
 
 **Daily Analysis:**
 - Stock ticker symbol to analyze
-- AWS Bedrock model ID for daily analysis agent
-- AWS credentials configured for Bedrock access
+- OpenRouter model ID for daily analysis agent
+- OpenRouter API key
 
 ### Output
 
@@ -237,27 +237,26 @@ financeagent/
 4. **Console Output Only**: No persistent output or reporting
 5. **Manual CSV Management**: Requires manual download and placement of CSV files
 6. **No Cost Optimization**: No caching or batching of API calls
-7. **AWS Bedrock Only**: Locked into AWS Bedrock for AI models
+7. **OpenRouter Only**: Uses OpenRouter as the AI provider (though OpenRouter supports multiple model providers)
 8. **No Testing**: No automated tests for reliability
 
 ## Environment Variables Reference
 
 ```bash
-# Portfolio Analysis - Required
+# OpenRouter API Configuration
+OPENROUTER_API_KEY=your_openrouter_api_key
+
+# Portfolio Configuration
 PORTFOLIO_CSVS_LOCATION=/path/to/csv/files
-FINANCE_AGENT_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
-PORTFOLIO_AGENT_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
-PORTFOLIO_ANALYSIS_TEAM_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
 STOCK_TICKER=COF
 
-# Daily Analysis - Required
-DAILY_ANALYSIS_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
-STOCK_TICKER=COF
-
-# AWS Credentials (set via AWS CLI or environment)
-AWS_ACCESS_KEY_ID=your-key
-AWS_SECRET_ACCESS_KEY=your-secret
-AWS_REGION=us-east-1
+# Model Configuration (OpenRouter model IDs)
+# Available models: anthropic/claude-sonnet-4.5, anthropic/claude-opus-4.5, openai/gpt-4, etc.
+# See https://openrouter.ai/models for full list
+FINANCE_AGENT_MODEL=anthropic/claude-sonnet-4.5
+PORTFOLIO_AGENT_MODEL=anthropic/claude-sonnet-4.5
+PORTFOLIO_ANALYSIS_TEAM_MODEL=anthropic/claude-sonnet-4.5
+DAILY_ANALYSIS_MODEL=anthropic/claude-sonnet-4.5
 ```
 
 ## Dependencies
@@ -265,7 +264,7 @@ AWS_REGION=us-east-1
 - **agno**: AI agent framework for building multi-agent systems
 - **yfinance**: Yahoo Finance API wrapper for market data
 - **python-dotenv**: Environment variable management
-- **boto3**: AWS SDK for Bedrock access
+- **openai**: OpenAI SDK for accessing OpenRouter API
 
 ## Common Tasks for Claude
 
@@ -295,7 +294,7 @@ When making changes, verify:
 - [ ] All environment variables are validated
 - [ ] CSV files are correctly discovered and loaded
 - [ ] API calls to YFinance succeed
-- [ ] AWS Bedrock models are accessible
+- [ ] OpenRouter API is accessible and models respond correctly
 - [ ] Team coordination produces coherent output
 - [ ] Error messages are helpful and actionable
 - [ ] Output is properly formatted in markdown

@@ -4,14 +4,14 @@ A financial portfolio analysis tool that uses AI agents to analyze stock portfol
 
 ## Overview
 
-This tool uses AWS Bedrock-powered AI agents to:
+This tool uses OpenRouter-powered AI agents to:
 - Analyze portfolio holdings from CSV files
 - Gather real-time financial data and market analysis for specific stocks
 - Generate comprehensive position analysis and detailed optimization strategies
 - Provide actionable sell-off plans over time
 - Perform daily technical analysis with RSI, MACD, and plain-language insights
 
-**Why AWS Bedrock?** This implementation uses AWS Bedrock to allow you to configure and switch between different AI models without changing code. Simply update the model IDs in your `.env` file to experiment with different models and find the best performance for your analysis needs.
+**Why OpenRouter?** This implementation uses OpenRouter to give you access to multiple AI providers (Anthropic, OpenAI, Google, Meta, and more) through a single API. You can configure and switch between different AI models without changing code. Simply update the model IDs in your `.env` file to experiment with different models and find the best performance for your analysis needs.
 
 ## Features
 
@@ -29,7 +29,7 @@ This tool uses AWS Bedrock-powered AI agents to:
 ## Requirements
 
 - Python 3.x
-- AWS Bedrock access
+- OpenRouter API key (get one at https://openrouter.ai/)
 - Required Python packages (see requirements.txt)
 
 ## Setup
@@ -41,28 +41,31 @@ pip install -r requirements.txt
 
 2. Create a `.env` file with the following required variables:
 
-**For Portfolio Analysis:**
-```
+```bash
+# OpenRouter API Configuration
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+
+# Portfolio Configuration
 PORTFOLIO_CSVS_LOCATION=/path/to/your/csv/files
-FINANCE_AGENT_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
-PORTFOLIO_AGENT_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
-PORTFOLIO_ANALYSIS_TEAM_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
 STOCK_TICKER=NFLX
+
+# Model Configuration (OpenRouter model IDs)
+FINANCE_AGENT_MODEL=anthropic/claude-sonnet-4.5
+PORTFOLIO_AGENT_MODEL=anthropic/claude-sonnet-4.5
+PORTFOLIO_ANALYSIS_TEAM_MODEL=anthropic/claude-sonnet-4.5
+DAILY_ANALYSIS_MODEL=anthropic/claude-sonnet-4.5
 ```
 
-**For Daily Analysis:**
-```
-DAILY_ANALYSIS_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
-STOCK_TICKER=NFLX
-```
+**OpenRouter Model ID Examples:**
+- `anthropic/claude-sonnet-4.5` - Claude 4.5 Sonnet (latest, most capable)
+- `anthropic/claude-opus-4.5` - Claude 4.5 Opus (most intelligent)
+- `anthropic/claude-3.5-sonnet` - Claude 3.5 Sonnet
+- `openai/gpt-4` - OpenAI GPT-4
+- `openai/gpt-4-turbo` - OpenAI GPT-4 Turbo
+- `google/gemini-pro-1.5` - Google Gemini Pro 1.5
+- `meta-llama/llama-3.1-70b-instruct` - Meta Llama 3.1 70B
 
-**AWS Bedrock Model ID Examples:**
-- `global.anthropic.claude-sonnet-4-20250514-v1:0` - Claude 4 Sonnet 
-- `anthropic.claude-3-5-sonnet-20241022-v2:0` - Claude 3.5 Sonnet
-- `anthropic.claude-3-5-haiku-20241022-v1:0` - Claude 3.5 Haiku (faster, lower cost)
-- `anthropic.claude-3-opus-20240229-v1:0` - Claude 3 Opus (most capable)
-- `amazon.nova-pro-v1:0` - Amazon Nova Pro
-- `amazon.nova-lite-v1:0` - Amazon Nova Lite
+For the full list of available models, visit: https://openrouter.ai/models
 
 You can mix and match different models for each agent based on your performance and cost requirements.
 
@@ -110,20 +113,23 @@ The tool will:
 
 All configuration is managed through environment variables:
 
-### Portfolio Analysis Variables
+### Required Variables
+- `OPENROUTER_API_KEY`: Your OpenRouter API key (get one at https://openrouter.ai/)
 - `PORTFOLIO_CSVS_LOCATION`: Path to folder containing portfolio CSV files
-- `FINANCE_AGENT_MODEL`: AWS Bedrock model ID for the finance agent
-- `PORTFOLIO_AGENT_MODEL`: AWS Bedrock model ID for the portfolio agent
-- `PORTFOLIO_ANALYSIS_TEAM_MODEL`: AWS Bedrock model ID for the team coordinator
 - `STOCK_TICKER`: Stock ticker symbol to analyze (e.g., NFLX for Netflix)
 
-### Daily Analysis Variables
-- `DAILY_ANALYSIS_MODEL`: AWS Bedrock model ID for the daily analysis agent
-- `STOCK_TICKER`: Stock ticker symbol to analyze (e.g., NFLX for Netflix)
+### Portfolio Analysis Model Variables
+- `FINANCE_AGENT_MODEL`: OpenRouter model ID for the finance agent
+- `PORTFOLIO_AGENT_MODEL`: OpenRouter model ID for the portfolio agent
+- `PORTFOLIO_ANALYSIS_TEAM_MODEL`: OpenRouter model ID for the team coordinator
+
+### Daily Analysis Model Variables
+- `DAILY_ANALYSIS_MODEL`: OpenRouter model ID for the daily analysis agent
 
 ## Dependencies
 
 - `agno`: AI agent framework
 - `yfinance`: Yahoo Finance data retrieval
 - `python-dotenv`: Environment variable management
-- `boto3`: AWS SDK for Python (Bedrock access)
+- `openai`: OpenAI SDK for Python (used to connect to OpenRouter API)
+- `duckdb`: Database library used by CSV tools

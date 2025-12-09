@@ -1,5 +1,5 @@
 agno
 yfinance
 python-dotenv
-boto3
+openai
 duckdb
